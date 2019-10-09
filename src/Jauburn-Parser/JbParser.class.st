@@ -137,7 +137,9 @@ Class {
 		'variableDeclarationStatement',
 		'program',
 		'stringExpression',
-		'stringComparisonExpression'
+		'stringComparisonExpression',
+		'booleanExpression',
+		'whileStatement'
 	],
 	#category : #'Jauburn-Parser-Core'
 }
@@ -226,6 +228,12 @@ JbParser >> assignmentStatement [
 				yourself ]
 ]
 
+{ #category : #accessing }
+JbParser >> booleanExpression [
+	
+	^('true' asParser / 'false' asParser) ==> [ :str | JbConstantExpressionNode new value: str = 'true'; yourself ]
+]
+
 { #category : #expressions }
 JbParser >> comparisonExpression [
 
@@ -250,8 +258,10 @@ JbParser >> expression [
 	/ comparisonExpression
 	/ stringComparisonExpression
 	/ stringExpression
-	/ arithmeticExpression 
+	/ booleanExpression
 	/ functionCallExpression 
+	/ arithmeticExpression 
+	
 
 ]
 
@@ -397,7 +407,7 @@ JbParser >> start [
 JbParser >> statement [
 
 	^ variableDeclarationStatement / assignmentStatement
-		/ ifElseStatement / ifStatement
+		/ ifElseStatement / ifStatement / whileStatement
 ]
 
 { #category : #statements }
@@ -441,5 +451,21 @@ JbParser >> variableDeclarationStatement [
 			JbVariableDeclarationStatementNode new
 				identifier: arr second;
 				expression: arr fourth;
+				yourself ]
+]
+
+{ #category : #statements }
+JbParser >> whileStatement [
+
+	^'while' asParser trim
+	, $( asParser trim
+	, expression
+	, $) asParser trim 
+	, statementBlock
+		 ==>
+		[ :arr |
+			JbWhileNode new
+				condition: arr third;
+				trueStatements: arr fifth;
 				yourself ]
 ]
